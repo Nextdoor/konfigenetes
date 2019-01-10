@@ -25,7 +25,7 @@ def main():
         print(f'Fatal Error:\n{e}')
         sys.exit(1)
 
-    print(yaml.dump_all(konfigured_resources, explicit_start=True))
+    print(yaml.safe_dump_all(konfigured_resources, explicit_start=True))
 
 
 def konfigenetes(input_file_paths=None, resource_file_paths=None,
@@ -77,13 +77,13 @@ def konfigenetes(input_file_paths=None, resource_file_paths=None,
         with open(resource_file_path, 'r') as resource_file:
             resources += list(filter(
                 lambda r: r is not None,
-                yaml.load_all(resource_file)))
+                yaml.safe_load_all(resource_file)))
     patches = []
     for patch_file_path in patch_file_paths:
         with open(patch_file_path, 'r') as patch_file:
             patches += list(filter(
                 lambda p: p is not None,
-                yaml.load_all(patch_file)))
+                yaml.safe_load_all(patch_file)))
 
     var_values = {}
     for var_value_raw in var_values_raw:
@@ -129,7 +129,7 @@ def read_input_file(input_file_path):
     var_values_raw = []
 
     with open(input_file_path, 'r') as input_file:
-        input_data = yaml.load(input_file)
+        input_data = yaml.safe_load(input_file)
         if input_data is None:
             return
 

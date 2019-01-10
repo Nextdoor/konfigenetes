@@ -49,7 +49,7 @@ setup(
     keywords="kubernetes config configuration template templating build",
     packages=["konfigenetes"],
     install_requires=[
-        "PyYAML==3.13",
+        "PyYAML==4.2b4",
     ],
     python_requires=">=3",
     cmdclass={
