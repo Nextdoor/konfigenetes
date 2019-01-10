@@ -6,19 +6,19 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - test-python-install:
+      - test-python-version:
           version: "3.4"
           requires:
             - build
-      - test-python-install:
+      - test-python-version:
           version: "3.5"
           requires:
             - build
-      - test-python-install:
+      - test-python-version:
           version: "3.6"
           requires:
             - build
-      - test-python-install:
+      - test-python-version:
           version: "3.7"
           requires:
             - build
@@ -54,7 +54,7 @@ jobs:
           command: |
             . venv/bin/activate
             python setup.py test
-  test-python-install:
+  test-python-version:
     parameters:
       version:
         type: string
@@ -80,11 +80,6 @@ jobs:
           command: |
             . venv/bin/activate
             python setup.py test
-      - run:
-          name: Test install
-          command: |
-            python --version
-            sudo pip3 install konfigenetes
   deploy:
     docker:
       - image: circleci/python:3.6
