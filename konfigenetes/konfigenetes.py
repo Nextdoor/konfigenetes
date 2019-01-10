@@ -22,7 +22,7 @@ def main():
             args.patch_file_paths,
             args.var_values)
     except ValueError as e:
-        print(f'Fatal Error:\n{e}')
+        print('Fatal Error:\n{}'.format(e))
         sys.exit(1)
 
     print(yaml.safe_dump_all(konfigured_resources, explicit_start=True))
@@ -89,7 +89,7 @@ def konfigenetes(input_file_paths=None, resource_file_paths=None,
     for var_value_raw in var_values_raw:
         split_values = var_value_raw.split('=')
         if len(split_values) != 2:
-            raise ValueError(f'Var must be in form of <VAR_NAME>=<VAR_VALUE>, was {var_value_raw}.')
+            raise ValueError('Var must be in form of <VAR_NAME>=<VAR_VALUE>, was {}.'.format(var_value_raw))
         var_values[split_values[0]] = split_values[1]
 
     apply_patches(resources, patches)
@@ -110,7 +110,7 @@ def konfigenetes(input_file_paths=None, resource_file_paths=None,
     if missing_vars:
         missing_var_error = ''
         for missing_var in missing_vars:
-            missing_var_error += f'  Missing var: {{{{ {missing_var} }}}}\n'
+            missing_var_error += '  Missing var: {{{{ {} }}}}\n'.format(missing_var)
         raise ValueError(missing_var_error)
 
     for needed_var in needed_vars:
@@ -135,25 +135,25 @@ def read_input_file(input_file_path):
 
         if 'inputs' in input_data:
             if type(input_data['inputs']) != list:
-                raise ValueError(f'"inputs" in input file {input_file_path} must be a list.')
+                raise ValueError('"inputs" in input file {} must be a list.'.format(input_file_path))
             input_file_paths += [
                 Path(input_file_path).parent / new_input_file_path
                 for new_input_file_path in input_data['inputs']]
         if 'resources' in input_data:
             if type(input_data['resources']) != list:
-                raise ValueError(f'"resources" in input file {input_file_path} must be a list.')
+                raise ValueError('"resources" in input file {} must be a list.'.format(input_file_path))
             resource_file_paths += [
                 Path(input_file_path).parent / resource_file_path
                 for resource_file_path in input_data['resources']]
         if 'patches' in input_data:
             if type(input_data['patches']) != list:
-                raise ValueError(f'"patches" in input file {input_file_path} must be a list.')
+                raise ValueError('"patches" in input file {} must be a list.'.format(input_file_path))
             patch_file_paths += [
                 Path(input_file_path).parent / patch_file_path
                 for patch_file_path in input_data['patches']]
         if 'vars' in input_data:
             if type(input_data['vars']) != list:
-                raise ValueError(f'"vars" in input file {input_file_path} must be a list.')
+                raise ValueError('"vars" in input file {} must be a list.'.format(input_file_path))
             var_values_raw += input_data['vars']
 
     return {
@@ -169,9 +169,9 @@ def apply_patches(resources, patches):
         patch_name = patch.get('metadata', {}).get('name', None)
         patch_kind = patch.get('kind', None)
         if patch_name is None:
-            raise ValueError(f'metadata.name must be set in all patches. Patch: {pprint.pformat(patch)}')
+            raise ValueError('metadata.name must be set in all patches. Patch: {}'.format(pprint.pformat(patch)))
         if patch_kind is None:
-            raise ValueError(f'kind must be set in all patches. Patch: {pprint.pformat(patch)}')
+            raise ValueError('kind must be set in all patches. Patch: {}'.format(pprint.pformat(patch)))
         for resource in resources:
             resource_name = resource.get('metadata', {}).get('name', None)
             resource_kind = resource.get('kind', None)
@@ -232,8 +232,9 @@ def apply_patch_recursive(resource, patch):
             if type(resource_value) != type(patch_value):
                 raise ValueError(
                     'type mismatch between patch and resource: '
-                    f'resource["{resource_key}"] is {type(resource_value)}, '
-                    f'patch["{resource_key}"] is {type(patch_value)}')
+                    'resource["{}"] is {}, '
+                    'patch["{}"] is {}'.format(resource_key, type(resource_value),
+                                               resource_key, type(patch_value)))
 
             if type(resource_value) == dict:
                 apply_patch_recursive(resource_value, patch_value)
