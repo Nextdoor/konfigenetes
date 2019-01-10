@@ -7,12 +7,12 @@ from konfigenetes import konfigenetes
 
 
 def test_data_file(filename):
-    """Gets path to a konfigenetes file"""
-    return Path(__file__).parent / 'test_data' / filename
+    """Gets path to a Konfigenetes file"""
+    return str(Path(__file__).parent / 'test_data' / filename)
 
 
-class TestKonfig(unittest.TestCase):
-    """Tests related to the Konfig tool"""
+class TestKonfigenetes(unittest.TestCase):
+    """Konfigenetes tests"""
 
     def test_no_changes(self):
         """Test no changes if no patches or variables."""

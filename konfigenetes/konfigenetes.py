@@ -137,19 +137,19 @@ def read_input_file(input_file_path):
             if type(input_data['inputs']) != list:
                 raise ValueError('"inputs" in input file {} must be a list.'.format(input_file_path))
             input_file_paths += [
-                Path(input_file_path).parent / new_input_file_path
+                str(Path(input_file_path).parent / new_input_file_path)
                 for new_input_file_path in input_data['inputs']]
         if 'resources' in input_data:
             if type(input_data['resources']) != list:
                 raise ValueError('"resources" in input file {} must be a list.'.format(input_file_path))
             resource_file_paths += [
-                Path(input_file_path).parent / resource_file_path
+                str(Path(input_file_path).parent / resource_file_path)
                 for resource_file_path in input_data['resources']]
         if 'patches' in input_data:
             if type(input_data['patches']) != list:
                 raise ValueError('"patches" in input file {} must be a list.'.format(input_file_path))
             patch_file_paths += [
-                Path(input_file_path).parent / patch_file_path
+                str(Path(input_file_path).parent / patch_file_path)
                 for patch_file_path in input_data['patches']]
         if 'vars' in input_data:
             if type(input_data['vars']) != list:
@@ -263,11 +263,12 @@ def merge_lists_of_dicts(target_list, other_list):
     If an item has a name key in list one,
     it will be merged with an item with the same name key in the second list.
     """
+    original_length = len(target_list)
     target_list += other_list
 
     named_items = {}
     # Iterate through first list and remember items with a name.
-    for i in range(0, len(other_list)):
+    for i in range(original_length):
         item = target_list[i]
         if 'name' in item:
             name = item['name']
@@ -278,7 +279,7 @@ def merge_lists_of_dicts(target_list, other_list):
 
     # Iterate through the rest of the list and update named items.
     # If updated, remove the patched version from the list.
-    i = len(other_list)
+    i = original_length
     while i < len(target_list):
         item = target_list[i]
         if 'name' in item:
@@ -294,7 +295,6 @@ def merge_lists_of_dicts(target_list, other_list):
                 # Don't increment i if we're splicing.
                 continue
         i += 1
-
 
 if __name__ == '__main__':
     main()
