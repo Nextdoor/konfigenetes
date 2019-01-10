@@ -1,0 +1,13 @@
+inputs:
+  # Test cyclic import.
+  - input_file.yml
+
+resources:
+  - ../resources/var_config.yml
+
+patches:
+  - ../patches/var_port.yml
+
+vars:
+  - PORT=8000
+  - VAR_VALUE=1

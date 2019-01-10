@@ -1,0 +1,18 @@
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: basic-service
+spec:
+  template:
+    spec:
+      containers:
+      - name: basic-service
+        volumeMounts:
+        - name: volume-mount
+          mountPath: /mnt
+      volumes:
+        - name: volume-mount
+          hostPath:
+            path: /mnt/basic-service

@@ -1,0 +1,41 @@
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: basic-service
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    name: http
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: basic-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: basic-service
+  template:
+    spec:
+      containers:
+      - name: basic-service
+        image: basic-service-image
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: ENV_1
+          value: VAL_1
+        - name: ENV_2
+          value: VAL_2
+        - name: ENV_3
+          value: VAL_3
+
+      - name: other-container
+        image: other-container-image

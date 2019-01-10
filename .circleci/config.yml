@@ -1,0 +1,131 @@
+version: 2.1
+workflows:
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - test-python-install:
+          version: "3.4"
+          requires:
+            - build
+      - test-python-install:
+          version: "3.5"
+          requires:
+            - build
+      - test-python-install:
+          version: "3.6"
+          requires:
+            - build
+      - test-python-install:
+          version: "3.7"
+          requires:
+            - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
+
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}
+      - run:
+          name: Install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+      - save_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}
+          paths:
+            - "venv"
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            python setup.py test
+  test-python-install:
+    parameters:
+      version:
+        type: string
+        default: latest
+    docker:
+      - image: circleci/python:<< parameters.version >>
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}
+      - run:
+          name: Install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+      - save_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}
+          paths:
+            - "venv"
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            python setup.py test
+      - run:
+          name: Test install
+          command: |
+            python --version
+            sudo pip3 install konfigenetes
+  deploy:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}
+      - run:
+          name: install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+      - save_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}
+          paths:
+            - "venv"
+      - run:
+          name: Verify git tag vs. version
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            python setup.py verify
+      - run:
+          name: Initialize .pypirc
+          command: |
+            echo "[pypi]" > ~/.pypirc
+            echo "username = Nextdoor" >> ~/.pypirc
+            echo "password = $PYPI_PASSWORD" >> ~/.pypirc
+      - run:
+          name: Install upload requirements
+          command: |
+            pip install twine
+            pip install wheel
+      - run:
+          name: Create packages
+          command: |
+            python setup.py sdist
+            python setup.py bdist_wheel
+      - run:
+          name: Upload to PyPI
+          command: |
+            . venv/bin/activate
+            twine upload dist/*

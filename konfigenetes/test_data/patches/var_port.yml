@@ -1,0 +1,10 @@
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: basic-service
+spec:
+  ports:
+  - port: '{{ PORT }}'
+    name: http

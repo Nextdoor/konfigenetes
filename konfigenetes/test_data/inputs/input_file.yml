@@ -1,0 +1,9 @@
+inputs:
+  - child_input_file.yml
+
+resources:
+  - ../resources/pod_and_service.yml
+
+patches:
+  - ../patches/env_vars.yml
+  - ../patches/volume_mounts.yml
