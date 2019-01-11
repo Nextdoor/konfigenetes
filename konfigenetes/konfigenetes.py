@@ -296,5 +296,6 @@ def merge_lists_of_dicts(target_list, other_list):
                 continue
         i += 1
 
+
 if __name__ == '__main__':
     main()
