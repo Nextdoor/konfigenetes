@@ -97,7 +97,10 @@ class TestKonfigenetes(unittest.TestCase):
             var_values={'VAR_VALUE': '1'})
 
         konfigured_data = konfigured_resources[0]['data']
-        expected_data = {'TEST_VAR_1': '1', 'TEST_VAR_2': '2'}
+        expected_data = {'TEST_VAR_1': '1', 'TEST_VAR_2': '2', 'TEST_VAR_3': 'start text 1 end text',
+                         'TEST_VAR_4': '1 end value', 'TEST_VAR_5': 'start text 1'}
+
+        print(konfigured_data, expected_data)
 
         self.assertEqual(konfigured_data, expected_data)
 
@@ -143,7 +146,8 @@ class TestKonfigenetes(unittest.TestCase):
         self.assertEqual(konfigured_ports, expected_ports)
 
         konfigured_data = konfigured_resources[2]['data']
-        expected_data = {'TEST_VAR_1': '1', 'TEST_VAR_2': '2'}
+        expected_data = {'TEST_VAR_1': '1', 'TEST_VAR_2': '2', 'TEST_VAR_3': 'start text 1 end text',
+                         'TEST_VAR_4': '1 end value', 'TEST_VAR_5': 'start text 1'}
 
         self.assertEqual(konfigured_data, expected_data)
 
@@ -190,6 +194,7 @@ class TestKonfigenetes(unittest.TestCase):
         self.assertEqual(konfigured_ports, expected_ports)
 
         konfigured_data = konfigured_resources[2]['data']
-        expected_data = {'TEST_VAR_1': '2', 'TEST_VAR_2': '2'}
+        expected_data = {'TEST_VAR_1': '2', 'TEST_VAR_2': '2', 'TEST_VAR_3': 'start text 2 end text',
+                         'TEST_VAR_4': '2 end value', 'TEST_VAR_5': 'start text 2'}
 
         self.assertEqual(konfigured_data, expected_data)

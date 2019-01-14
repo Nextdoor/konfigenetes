@@ -93,14 +93,15 @@ def konfigenetes(input_file_paths=None, resource_file_paths=None,
 
     apply_patches(resources, patches)
 
-    needed_vars = None
+    string_var_lists = None
     for resource in resources:
-        needed_vars = find_vars_recursive(resource, needed_vars=needed_vars)
+        string_var_lists = find_string_var_lists_recursive(resource, string_var_lists=string_var_lists)
 
-    if needed_vars is None:
-        needed_vars = []
+    if string_var_lists is None:
+        string_var_lists = []
 
-    var_names = set([needed_var['var'] for needed_var in needed_vars])
+    var_names = set([needed_var for string_var_list in string_var_lists
+                     for needed_var in string_var_list.needed_vars])
     missing_vars = []
     for var_name in var_names:
         if var_name not in var_values:
@@ -112,11 +113,8 @@ def konfigenetes(input_file_paths=None, resource_file_paths=None,
             missing_var_error += '  Missing var: {{{{ {} }}}}\n'.format(missing_var)
         raise ValueError(missing_var_error)
 
-    for needed_var in needed_vars:
-        if 'list' in needed_var:
-            needed_var['list'][needed_var['index']] = var_values[needed_var['var']]
-        elif 'dict' in needed_var:
-            needed_var['dict'][needed_var['key']] = var_values[needed_var['var']]
+    for string_var_list in string_var_lists:
+        string_var_list.save(var_values)
 
     return resources
 
@@ -188,42 +186,101 @@ def apply_patches(resources, patches):
                 apply_patch_recursive(resource, patch)
 
 
-def find_vars_recursive(resource, needed_vars=None):
-    if needed_vars is None:
-        needed_vars = []
+def find_string_var_lists_recursive(resource, string_var_lists=None):
+    if string_var_lists is None:
+        string_var_lists = []
 
     for resource_key, resource_value in resource.items():
         if type(resource_value) == dict:
-            find_vars_recursive(resource_value, needed_vars=needed_vars)
+            find_string_var_lists_recursive(resource_value, string_var_lists=string_var_lists)
         elif type(resource_value) == list:
             for i in range(len(resource_value)):
                 item = resource_value[i]
                 if type(item) == dict:
-                    find_vars_recursive(item, needed_vars=needed_vars)
+                    find_string_var_lists_recursive(item, string_var_lists=string_var_lists)
                 elif type(item) == str:
-                    var_name = var_name_for_string(item)
-                    if var_name is not None:
-                        needed_vars.append({
-                            'list': resource_value,
-                            'index': i,
-                            'var': var_name,
-                        })
+                    string_var_list = StringVarList(item, {
+                        'list': resource_value,
+                        'index': i,
+                    })
+                    if string_var_list.needs_vars():
+                        string_var_lists.append(string_var_list)
         elif type(resource_value) == str:
-            var_name = var_name_for_string(resource_value)
-            if var_name is not None:
-                needed_vars.append({
-                    'dict': resource,
-                    'key': resource_key,
-                    'var': var_name,
-                })
+            string_var_list = StringVarList(resource_value, {
+                'dict': resource,
+                'key': resource_key,
+            })
+            if string_var_list.needs_vars():
+                string_var_lists.append(string_var_list)
 
-    return needed_vars
+    return string_var_lists
 
 
-def var_name_for_string(input_string):
-    if input_string.startswith('{{') and input_string.endswith('}}'):
-        return input_string[2:-2].strip()
-    return None
+class StringVarList:
+    def __init__(self, string, parent):
+        self.string_parts = self.extract_parts(string)
+        self.needed_vars = [value for var_type, value in self.string_parts
+                            if var_type == 'var']
+        self.parent = parent
+
+    def needs_vars(self):
+        return len(self.needed_vars) > 0
+
+    def save(self, var_values):
+        if 'list' in self.parent:
+            self.parent['list'][self.parent['index']] = self.substitute_vars(var_values)
+        elif 'dict' in self.parent:
+            self.parent['dict'][self.parent['key']] = self.substitute_vars(var_values)
+
+    def substitute_vars(self, var_values):
+        substitution = []
+        for var_type, value in self.string_parts:
+            if var_type == 'text':
+                substitution.append(value)
+            elif var_type == 'var':
+                substitution.append(var_values[value])
+        return ''.join(substitution)
+
+    def extract_parts(self, string):
+        string_parts = []
+
+        outer_left_curly = False
+        inner_left_curly = False
+        inner_right_curly = False
+
+        text_string = ''
+        var_string = ''
+
+        for c in string:
+            if not outer_left_curly:
+                if c == '{':
+                    outer_left_curly = True
+                else:
+                    text_string += c
+            elif not inner_left_curly:
+                if c == '{':
+                    inner_left_curly = True
+                    string_parts.append(('text', text_string))
+                    text_string = ''
+                else:
+                    raise ValueError('Malformed var string: {}'.format(string))
+            elif not inner_right_curly:
+                if c == '}':
+                    inner_right_curly = True
+                    string_parts.append(('var', var_string.strip()))
+                    var_string = ''
+                else:
+                    var_string += c
+            else:
+                if c == '}':
+                    outer_left_curly = False
+                    inner_left_curly = False
+                    inner_right_curly = False
+                else:
+                    raise ValueError('Malformed var string: {}'.format(string))
+
+        string_parts.append(('text', text_string))
+        return string_parts
 
 
 EXCLUDE_KEYS = {

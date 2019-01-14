@@ -7,3 +7,6 @@ metadata:
 data:
   TEST_VAR_1: '{{ VAR_VALUE }}'
   TEST_VAR_2: '2'
+  TEST_VAR_3: 'start text {{ VAR_VALUE }} end text'
+  TEST_VAR_4: '{{ VAR_VALUE }} end value'
+  TEST_VAR_5: 'start text {{ VAR_VALUE }}'
