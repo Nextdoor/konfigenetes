@@ -98,7 +98,8 @@ class TestKonfigenetes(unittest.TestCase):
 
         konfigured_data = konfigured_resources[0]['data']
         expected_data = {'TEST_VAR_1': '1', 'TEST_VAR_2': '2', 'TEST_VAR_3': 'start text 1 end text',
-                         'TEST_VAR_4': '1 end value', 'TEST_VAR_5': 'start text 1'}
+                         'TEST_VAR_4': '1 end value', 'TEST_VAR_5': 'start text 1',
+                         'TEST_VAR_6': 'not a variable { VAR_VALUE }'}
 
         print(konfigured_data, expected_data)
 
@@ -147,7 +148,8 @@ class TestKonfigenetes(unittest.TestCase):
 
         konfigured_data = konfigured_resources[2]['data']
         expected_data = {'TEST_VAR_1': '1', 'TEST_VAR_2': '2', 'TEST_VAR_3': 'start text 1 end text',
-                         'TEST_VAR_4': '1 end value', 'TEST_VAR_5': 'start text 1'}
+                         'TEST_VAR_4': '1 end value', 'TEST_VAR_5': 'start text 1',
+                         'TEST_VAR_6': 'not a variable { VAR_VALUE }'}
 
         self.assertEqual(konfigured_data, expected_data)
 
@@ -195,6 +197,7 @@ class TestKonfigenetes(unittest.TestCase):
 
         konfigured_data = konfigured_resources[2]['data']
         expected_data = {'TEST_VAR_1': '2', 'TEST_VAR_2': '2', 'TEST_VAR_3': 'start text 2 end text',
-                         'TEST_VAR_4': '2 end value', 'TEST_VAR_5': 'start text 2'}
+                         'TEST_VAR_4': '2 end value', 'TEST_VAR_5': 'start text 2',
+                         'TEST_VAR_6': 'not a variable { VAR_VALUE }'}
 
         self.assertEqual(konfigured_data, expected_data)

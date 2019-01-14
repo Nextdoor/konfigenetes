@@ -263,7 +263,9 @@ class StringVarList:
                     string_parts.append(('text', text_string))
                     text_string = ''
                 else:
-                    raise ValueError('Malformed var string: {}'.format(string))
+                    # Only one left curly, assume not a variable.
+                    outer_left_curly = False
+                    text_string += 'c'
             elif not inner_right_curly:
                 if c == '}':
                     inner_right_curly = True
