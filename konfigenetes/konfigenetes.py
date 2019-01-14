@@ -20,7 +20,7 @@ def main():
             args.input_file_paths,
             args.resource_file_paths,
             args.patch_file_paths,
-            args.var_values)
+            parse_var_values(args.var_values))
     except ValueError as e:
         print('Fatal Error:\n{}'.format(e))
         sys.exit(1)
@@ -29,7 +29,7 @@ def main():
 
 
 def konfigenetes(input_file_paths=None, resource_file_paths=None,
-                 patch_file_paths=None, var_values_raw=None):
+                 patch_file_paths=None, var_values=None):
     if input_file_paths is None:
         input_file_paths = []
 
@@ -39,8 +39,8 @@ def konfigenetes(input_file_paths=None, resource_file_paths=None,
     if patch_file_paths is None:
         patch_file_paths = []
 
-    if var_values_raw is None:
-        var_values_raw = []
+    if var_values is None:
+        var_values = {}
 
     resource_file_paths_from_inputs = []
     patch_file_paths_from_inputs = []
@@ -70,7 +70,7 @@ def konfigenetes(input_file_paths=None, resource_file_paths=None,
     # the config taken from input files.
     resource_file_paths = resource_file_paths_from_inputs + resource_file_paths
     patch_file_paths = patch_file_paths_from_inputs + patch_file_paths
-    var_values_raw = var_values_raw_from_inputs + var_values_raw
+    var_values_raw = var_values_raw_from_inputs
 
     resources = []
     for resource_file_path in resource_file_paths:
@@ -85,12 +85,11 @@ def konfigenetes(input_file_paths=None, resource_file_paths=None,
                 lambda p: p is not None,
                 yaml.safe_load_all(patch_file)))
 
-    var_values = {}
-    for var_value_raw in var_values_raw:
-        split_values = var_value_raw.split('=')
-        if len(split_values) != 2:
-            raise ValueError('Var must be in form of <VAR_NAME>=<VAR_VALUE>, was {}.'.format(var_value_raw))
-        var_values[split_values[0]] = split_values[1]
+    # Add newly parsed var values to those passed in.
+    # The order of dicts is important: New passed in vars must override the vars in the files.
+    var_values = dict(
+        parse_var_values(var_values_raw),
+        **var_values)
 
     apply_patches(resources, patches)
 
@@ -120,6 +119,16 @@ def konfigenetes(input_file_paths=None, resource_file_paths=None,
             needed_var['dict'][needed_var['key']] = var_values[needed_var['var']]
 
     return resources
+
+
+def parse_var_values(var_values_raw):
+    var_values = {}
+    for var_value_raw in var_values_raw:
+        split_values = var_value_raw.split('=')
+        if len(split_values) != 2:
+            raise ValueError('Var must be in form of <VAR_NAME>=<VAR_VALUE>, was {}.'.format(var_value_raw))
+        var_values[split_values[0]] = split_values[1]
+    return var_values
 
 
 def read_input_file(input_file_path):

@@ -76,7 +76,7 @@ class TestKonfigenetes(unittest.TestCase):
         konfigured_resources = konfigenetes(
             resource_file_paths=[test_data_file('resources/pod_and_service.yml')],
             patch_file_paths=[test_data_file('patches/var_port.yml')],
-            var_values_raw=['PORT=8000'])
+            var_values={'PORT': '8000'})
 
         konfigured_ports = konfigured_resources[0]['spec']['ports']
         expected_ports = [
@@ -94,7 +94,7 @@ class TestKonfigenetes(unittest.TestCase):
 
         konfigured_resources = konfigenetes(
             resource_file_paths=[test_data_file('resources/var_config.yml')],
-            var_values_raw=['VAR_VALUE=1'])
+            var_values={'VAR_VALUE': '1'})
 
         konfigured_data = konfigured_resources[0]['data']
         expected_data = {'TEST_VAR_1': '1', 'TEST_VAR_2': '2'}
@@ -151,7 +151,7 @@ class TestKonfigenetes(unittest.TestCase):
         """Test a large input file works with var overrides."""
         konfigured_resources = konfigenetes(
             input_file_paths=[test_data_file('inputs/input_file.yml')],
-            var_values_raw=["PORT=80", "VAR_VALUE=2"])
+            var_values={'PORT': '80', 'VAR_VALUE': '2'})
 
         konfigured_volume_mounts = konfigured_resources[1]['spec']['template']['spec']['containers'][0]['volumeMounts']
         expected_volume_mounts = [
