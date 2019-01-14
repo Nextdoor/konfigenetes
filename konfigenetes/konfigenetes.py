@@ -239,7 +239,7 @@ class StringVarList:
                 substitution.append(value)
             elif var_type == 'var':
                 substitution.append(var_values[value])
-        return ''.join(substitution)
+        return ''.join([str(value) for value in substitution])
 
     def extract_parts(self, string):
         string_parts = []
